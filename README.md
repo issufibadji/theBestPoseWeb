@@ -1,9 +1,9 @@
 # The Best Estimation Pose
 
-This folder contains the source code for a simple web application that detects objects in images using Transformers.js! Check out the demo [here](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector).
+TEsta pasta contém o código-fonte de um aplicativo web simples que detecta objetos em imagens usando Transformers.js! Confira a demonstração [aqui](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector).
 
-If you'd like to build it yourself, you can follow the [written](https://huggingface.co/docs/transformers.js)
+Se você quiser construí-lo sozinho, você pode seguir as instruções escritas [written](https://huggingface.co/docs/transformers.js)
 
-Here's how it works: the user clicks “Upload image” and selects an image using an input dialog. After analysing the image with an object detection model, the predicted bounding boxes are overlaid on top of the image, like this:
+Funciona assim: o usuário clica em “Carregar imagem” e seleciona uma imagem usando uma caixa de diálogo de entrada. Depois de analisar a imagem com um modelo de detecção de objetos, as caixas delimitadoras previstas são sobrepostas na parte superior da imagem, assim:
 
 ![Demo](https://github.com/issufibadji/theBestPoseWeb/blob/master/img/demo.png)
