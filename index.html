@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimativa de Pose - Ferramenta de Análise</title>
+</head>
+
+<body>
+    <main class="container">
+        <h1>Estimativa de Pose com Transformers.js</h1>
+        <p class="description">Carregue uma imagem ou vídeo para analisar a pose das pessoas usando nossa ferramenta avançada de estimativa de pose.</p>
+
+        <!-- Formulário de Configuração -->
+        <div class="options-section">
+            <h2>Configurações de Entrada</h2>
+            <label>
+                <input type="radio" name="input-type" value="image" checked> Imagem
+            </label>
+            <label>
+                <input type="radio" name="input-type" value="video"> Vídeo
+            </label>
+        </div>
+
+        <!-- Área de Upload -->
+        <div class="upload-section">
+            <label class="custom-file-upload">
+                <input id="file-upload" type="file" accept="image/*, video/*" />
+                <img class="upload-icon" src="https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/upload-icon.png" />
+                <span>Arraste e solte o arquivo aqui ou clique para carregar</span>
+            </label>
+        </div>
+
+        <div id="image-container"></div>
+        <p id="status">Nenhum arquivo carregado ainda.</p>
+
+        <!-- Seção de Ajuda -->
+        <div class="help-section">
+            <h2>Como Usar</h2>
+            <ul>
+                <li>Clique ou arraste um arquivo para a área de upload para selecionar uma imagem ou vídeo.</li>
+                <li>Escolha o tipo de entrada e espere até que a análise seja concluída.</li>
+                <li>Os pontos-chave e a pose serão exibidos sobre a imagem ou vídeo carregado.</li>
+            </ul>
+            <h2>Dicas</h2>
+            <ul>
+                <li>Use arquivos de alta qualidade para obter melhores resultados de estimativa de pose.</li>
+                <li>Imagens ou vídeos com boa iluminação e menos sobreposição de pessoas proporcionam resultados mais precisos.</li>
+            </ul>
+        </div>
+    </main>
+    <script src="js/index.js" type="module"></script>
+</body>
+
+</html>
