@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Estimativa de Pose - Ferramenta de Análise</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
@@ -36,6 +37,11 @@
         <div id="image-container"></div>
         <p id="status">Nenhum arquivo carregado ainda.</p>
 
+        <!-- Seção de Gráficos -->
+        <div id="accuracyChart" style="width: 500px; height: 300px; margin-top: 20px;"></div>
+
+        <div id="pointsChart" style="width: 500px; height: 300px; margin-top: 20px;"></div>
+
         <!-- Seção de Ajuda -->
         <div class="help-section">
             <h2>Como Usar</h2>
@@ -52,6 +58,8 @@
         </div>
     </main>
     <script src="js/index.js" type="module"></script>
+    <script src="js/d3_chart.js" type="module"></script>
+    <script src="js/d3_points_chart.js" type="module"></script>
 </body>
 
 </html>

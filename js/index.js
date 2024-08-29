@@ -1,82 +1,8 @@
 import { AutoModel, AutoProcessor, RawImage } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
+import { renderChart } from './d3_chart.js';
+import { renderPointsChart } from './d3_points_chart.js';
 
-// Load model and processor
-const model_id = 'Xenova/yolov8s-pose';
-const model = await AutoModel.from_pretrained(model_id);
-const processor = await AutoProcessor.from_pretrained(model_id);
-
-const status = document.getElementById('status');
-const fileUpload = document.getElementById('file-upload');
-const imageContainer = document.getElementById('image-container');
-
-fileUpload.addEventListener('change', async function(e) {
-    const file = e.target.files[0];
-    if (!file) {
-        return;
-    }
-
-    const reader = new FileReader();
-
-    // Set up a callback when the file is loaded
-    reader.onload = async function(e2) {
-        imageContainer.innerHTML = '';
-        const image = document.createElement('img');
-        image.src = e2.target.result;
-        image.style.maxWidth = '100%';
-        imageContainer.appendChild(image);
-        await estimatePose(image);
-    };
-    reader.readAsDataURL(file);
-});
-
-// Define common keypoint connections for drawing lines
-const keypointConnections = [
-    [5, 6], // shoulders
-    [5, 7],
-    [7, 9], // left arm
-    [6, 8],
-    [8, 10], // right arm
-    [5, 11],
-    [6, 12], // upper torso to hips
-    [11, 12], // hips
-    [11, 13],
-    [13, 15], // left leg
-    [12, 14],
-    [14, 16], // right leg
-];
-
-// List of colors to differentiate each person
-const colors = [
-    'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta'
-];
-
-// Estimate pose in the image
-async function estimatePose(img) {
-    status.textContent = 'Analsando...';
-
-    const rawImage = await RawImage.read(img.src);
-    const { pixel_values } = await processor(rawImage);
-
-    const { output0 } = await model({ images: pixel_values });
-    const permuted = output0[0].transpose(1, 0);
-
-    const results = [];
-    const [scaledHeight, scaledWidth] = pixel_values.dims.slice(-2);
-    for (const [xc, yc, w, h, score, ...keypoints] of permuted.tolist()) {
-        if (score < 0.3) continue;
-
-        const x1 = (xc - w / 2) / scaledWidth * img.width;
-        const y1 = (yc - h / 2) / scaledHeight * img.height;
-        const x2 = (xc + w / 2) / scaledWidth * img.width;
-        const y2 = (yc + h / 2) / scaledHeight * img.height;
-        results.push({ x1, x2, y1, y2, score, keypoints });
-    }
-
-    const filteredResults = removeDuplicates(results, 0.5);
-    renderResults(filteredResults, img, scaledWidth, scaledHeight);
-    status.textContent = 'Carregado';
-}
-
+// Funções auxiliares
 function removeDuplicates(detections, iouThreshold) {
     const filteredDetections = [];
 
@@ -119,10 +45,27 @@ function calculateIoU(detection1, detection2) {
     return overlapArea / unionArea;
 }
 
-// Render results on the image
 function renderResults(results, img, scaledWidth, scaledHeight) {
+    const colors = [
+        'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta'
+    ];
+
+    const keypointConnections = [
+        [5, 6], // shoulders
+        [5, 7],
+        [7, 9], // left arm
+        [6, 8],
+        [8, 10], // right arm
+        [5, 11],
+        [6, 12], // upper torso to hips
+        [11, 12], // hips
+        [11, 13],
+        [13, 15], // left leg
+        [12, 14],
+        [14, 16], // right leg
+    ];
+
     results.forEach(({ keypoints }, index) => {
-        // Draw keypoints and connections
         const points = [];
         for (let i = 0; i < keypoints.length; i += 3) {
             const [x, y, point_score] = keypoints.slice(i, i + 3);
@@ -143,7 +86,6 @@ function renderResults(results, img, scaledWidth, scaledHeight) {
             points.push({ x: (x / scaledWidth) * img.width, y: (y / scaledHeight) * img.height });
         }
 
-        // Draw connections between keypoints
         keypointConnections.forEach(([start, end]) => {
             if (points[start] && points[end]) {
                 const lineElement = document.createElement('div');
@@ -167,4 +109,74 @@ function renderResults(results, img, scaledWidth, scaledHeight) {
             }
         });
     });
+}
+
+// Carregar modelo e processador
+const model_id = 'Xenova/yolov8s-pose';
+const model = await AutoModel.from_pretrained(model_id);
+const processor = await AutoProcessor.from_pretrained(model_id);
+
+const status = document.getElementById('status');
+const fileUpload = document.getElementById('file-upload');
+const imageContainer = document.getElementById('image-container');
+
+fileUpload.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async function(e2) {
+        imageContainer.innerHTML = '';
+        const image = document.createElement('img');
+        image.src = e2.target.result;
+        image.style.maxWidth = '100%';
+        imageContainer.appendChild(image);
+        await estimatePose(image);
+    };
+    reader.readAsDataURL(file);
+});
+
+async function estimatePose(img) {
+    status.textContent = 'Analisando...';
+
+    const rawImage = await RawImage.read(img.src);
+    const { pixel_values } = await processor(rawImage);
+
+    const { output0 } = await model({ images: pixel_values });
+    const permuted = output0[0].transpose(1, 0);
+
+    const results = [];
+    const pointsData = [];
+    const [scaledHeight, scaledWidth] = pixel_values.dims.slice(-2);
+    for (const [xc, yc, w, h, score, ...keypoints] of permuted.tolist()) {
+        if (score < 0.3) continue;
+
+        const x1 = (xc - w / 2) / scaledWidth * img.width;
+        const y1 = (yc - h / 2) / scaledHeight * img.height;
+        const x2 = (xc + w / 2) / scaledWidth * img.width;
+        const y2 = (yc + h / 2) / scaledHeight * img.height;
+        results.push({ x1, x2, y1, y2, score, keypoints });
+
+        if (keypoints && Array.isArray(keypoints)) {
+            const reliablePoints = keypoints.filter((_, i) => i % 3 === 2 && keypoints[i] > 0.5).length;
+            pointsData.push(reliablePoints);
+        } else {
+            console.error("Keypoints estão indefinidos ou não são um array.", keypoints);
+        }
+    }
+
+    const filteredResults = removeDuplicates(results, 0.5);
+    renderResults(filteredResults, img, scaledWidth, scaledHeight);
+    renderChart(filteredResults);
+
+    if (pointsData.length > 0) {
+        renderPointsChart(filteredResults);
+    } else {
+        console.error("Nenhum dado de pontos-chave confiáveis encontrado.");
+    }
+
+    status.textContent = 'Carregado';
 }
